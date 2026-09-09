@@ -361,3 +361,17 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# ignore sending bins
+libs/Bin
+/libs/h/vulkan/glslang/SPIRV/SpvTools.h
+/libs/h/vulkan/glslang/SPIRV/GlslangToSpv.h
+/libs/lib/cmake/glslang/glslang/glslang-config-version.cmake
+/libs/lib/cmake/glslang/glslang/glslang-config.cmake
+/libs/lib/cmake/glslang/glslang/glslang-targets-relwithdebinfo.cmake
+/libs/lib/cmake/glslang/glslang/glslang-targets.cmake
+/libs/lib/glslangd.lib
+/libs/lib/SPIRV-Toolsd.lib
+/libs/lib/shaderc_combined.lib
+/libs/lib/SPIRV-Tools-opt.lib
+/libs/lib/SPIRV-Tools-optd.lib
