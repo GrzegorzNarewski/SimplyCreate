@@ -14,8 +14,6 @@ namespace gll
 
 		stock()->createStock();
 
-		window()->createWindow("Vulkan Engine", 800, 600);
-
 		inputhandler()->createHandler(window());
 	}
 	void EngineManager::updateEngine()
@@ -26,12 +24,17 @@ namespace gll
 
 			inputhandler()->updateHandler();
 
+			stock()->beginRender();
+
+			stock()->beginRecordCommandBuffer("default", "default");
 			update();
+			stock()->endRecordCommandBuffer();
+
+			stock()->submitRender(true);
 		}
 	}
 	void EngineManager::deleteEngine()
 	{
 		stock()->deleteStock();
-		window()->deleteWindow();
 	}
 }

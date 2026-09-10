@@ -117,7 +117,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>D:\Programming\Engine\SimplyCreate\libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -137,7 +137,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\Programming\Engine\SimplyCreate\libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
@@ -146,19 +146,56 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Library\Animation.cpp" />
+    <ClCompile Include="Library\Buffer.cpp" />
+    <ClCompile Include="Library\Camera.cpp" />
+    <ClCompile Include="Library\Collider.cpp" />
+    <ClCompile Include="Library\CommandBuffer.cpp" />
+    <ClCompile Include="Library\Deleter.cpp" />
+    <ClCompile Include="Library\Devices.cpp" />
     <ClCompile Include="Library\EngineManager.cpp" />
+    <ClCompile Include="Library\FileManager.cpp" />
+    <ClCompile Include="Library\FrameBuffer.cpp" />
     <ClCompile Include="Library\Helper.cpp" />
+    <ClCompile Include="Library\Images.cpp" />
     <ClCompile Include="Library\Input.cpp" />
     <ClCompile Include="Library\Instance.cpp" />
+    <ClCompile Include="Library\RenderPass.cpp" />
+    <ClCompile Include="Library\ResourceManager.cpp" />
+    <ClCompile Include="Library\SemFence.cpp" />
+    <ClCompile Include="Library\Shader.cpp" />
     <ClCompile Include="Library\Stock.cpp" />
+    <ClCompile Include="Library\Swapchain.cpp" />
+    <ClCompile Include="Library\Uniform.cpp" />
+    <ClCompile Include="Library\VertexBuffer.cpp" />
+    <ClCompile Include="Library\Waves.cpp" />
     <ClCompile Include="Library\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Library\Animation.h" />
+    <ClInclude Include="Library\Buffer.h" />
+    <ClInclude Include="Library\Camera.h" />
+    <ClInclude Include="Library\Collider.h" />
+    <ClInclude Include="Library\CommandBuffer.h" />
+    <ClInclude Include="Library\Deleter.h" />
+    <ClInclude Include="Library\Devices.h" />
     <ClInclude Include="Library\EngineManager.h" />
+    <ClInclude Include="Library\FileManager.h" />
+    <ClInclude Include="Library\FrameBuffer.h" />
     <ClInclude Include="Library\Helper.h" />
+    <ClInclude Include="Library\Images.h" />
     <ClInclude Include="Library\Input.h" />
     <ClInclude Include="Library\Instance.h" />
+    <ClInclude Include="Library\RenderPass.h" />
+    <ClInclude Include="Library\ResourceManager.h" />
+    <ClInclude Include="Library\SemFence.h" />
+    <ClInclude Include="Library\Shader.h" />
+    <ClInclude Include="Library\stb_image.h" />
     <ClInclude Include="Library\Stock.h" />
+    <ClInclude Include="Library\Swapchain.h" />
+    <ClInclude Include="Library\Uniform.h" />
+    <ClInclude Include="Library\VertexBuffer.h" />
+    <ClInclude Include="Library\Waves.h" />
     <ClInclude Include="Library\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
