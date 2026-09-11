@@ -76,8 +76,8 @@ namespace gll
         if(glfwGetInputMode(window()->handel, GLFW_CURSOR) != GLFW_CURSOR_NORMAL) return false;
 
         glm::vec4 poses[4] = {
-            resources.proj2d * glm::vec4(pos + glm::vec2(-size.x, size.y), 0.0f, 1.0f), resources.proj2d * glm::vec4(pos + glm::vec2(size.x, size.y), 0.0f, 1.0f),
-            resources.proj2d * glm::vec4(pos + glm::vec2(-size.x,-size.y), 0.0f, 1.0f), resources.proj2d * glm::vec4(pos + glm::vec2(size.x,-size.y), 0.0f, 1.0f),
+            rManager()->proj2d* glm::vec4(pos + glm::vec2(-size.x, size.y), 0.0f, 1.0f), rManager()->proj2d* glm::vec4(pos + glm::vec2(size.x, size.y), 0.0f, 1.0f),
+            rManager()->proj2d * glm::vec4(pos + glm::vec2(-size.x,-size.y), 0.0f, 1.0f), rManager()->proj2d * glm::vec4(pos + glm::vec2(size.x,-size.y), 0.0f, 1.0f),
         };
         if (mousePos.x > poses[0].x && mousePos.x < poses[1].x &&
             mousePos.y > poses[2].y && mousePos.y < poses[1].y) {

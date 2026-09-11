@@ -145,7 +145,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Library\Animation.cpp" />
     <ClCompile Include="Library\Buffer.cpp" />
     <ClCompile Include="Library\Camera.cpp" />

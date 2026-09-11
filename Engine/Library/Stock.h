@@ -27,6 +27,8 @@ namespace gll
 		void createStock();
 		void deleteStock();
 
+        void WaitDeviceIdle();
+
         void cleanUpSwapchain();
         void recreateSwapchain(bool createWindow);
         void submitCommandBuffer(CommandBuffer& commandbuffer, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores, VkFence& fence, uint32_t currentFrame, bool present);

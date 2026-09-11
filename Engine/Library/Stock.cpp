@@ -88,6 +88,10 @@ namespace gll
         instance.deleteInstance();
 	}
 
+    void Stock::WaitDeviceIdle()
+    {
+        vkDeviceWaitIdle(stock()->devices.LDev);
+    }
 
     void Stock::cleanUpSwapchain()
     {

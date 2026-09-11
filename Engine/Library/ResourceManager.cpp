@@ -3,10 +3,17 @@
 namespace gll
 {
     ResourceManager resources;
+    ResourceManager* rManager()
+    {
+        return &resources;
+    }
 
     void ResourceManager::createResourceManager()
     {
         lightinfos.clear();
+        lightinfos.push_back({});
+        lightinfos[0].position = glm::vec4(2.5f, 3.0f, 0.1f, 1.0f);
+        lightinfos[0].color = glm::vec4(1.0f);
     }
 
     void ResourceManager::restartUBOs()
@@ -40,8 +47,8 @@ namespace gll
 
         for(auto r : shaders) {
             for(auto s : r.second) {
-                vkCmdPushConstants( stock()->cBuffers["default"].commandBuffers[stock()->currentFrame], s.second.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, 16 * sizeof(float), &view );
-                vkCmdPushConstants( stock()->cBuffers["default"].commandBuffers[stock()->currentFrame], s.second.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 32 * sizeof(float), 4 * sizeof(float), &camPos);
+                //vkCmdPushConstants( stock()->cBuffers["default"].commandBuffers[stock()->currentFrame], s.second.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, 16 * sizeof(float), &view );
+                vkCmdPushConstants( stock()->cBuffers["default"].commandBuffers[stock()->currentFrame], s.second.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 16 * sizeof(float), 4 * sizeof(float), &camPos);
             }
         }
 	}
@@ -137,7 +144,7 @@ namespace gll
 	{
         CommandBuffer* cbuff = &stock()->cBuffers["default"];
 
-        vkCmdPushConstants(cbuff->commandBuffers[stock()->currentFrame], tmpS->pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 16 * sizeof(float), 16 * sizeof(float), &proj);
+        vkCmdPushConstants(cbuff->commandBuffers[stock()->currentFrame], tmpS->pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, 16 * sizeof(float), &proj);
 
         VertexBuffer* vbuff = findVertexBuffer(vBuffer);
         vbuff->bindVertexBuffer(cbuff->commandBuffers[stock()->currentFrame]);
@@ -184,6 +191,7 @@ namespace gll
 
         ModelUBO ubo;
         ubo.model = model * outerModel;
+        ubo.view = view;
         ubo.color = color;
         uniformBuffers[decId].bufferdata[0].data = &ubo;
 
@@ -213,6 +221,7 @@ namespace gll
         for(int i=0; i<models.size(); i++) {
             ubo.model[i] = models[i];
         }
+        ubo.view = view;
         uniformBuffers[decId].bufferdata[0].data = &ubo;
 
         LightUBO ubo2;
@@ -230,11 +239,11 @@ namespace gll
 	    Shader* tmpS = findShader(shader, currentRenderPass);
 
 	    std::string uboName = "MODEL_SQUARE" + shader + " " + texture;
-        int decId = findUBOToUse(uboName, tmpS, {texture}, {sizeof(ModelUBO)});
+        int decId = findUBOToUse(uboName, tmpS, {texture}, {sizeof(Model2DUBO)});
 
         glm::mat4 model = calcModel(pos, size, rot);
 
-        ModelUBO ubo;
+        Model2DUBO ubo;
         ubo.model = model;
         ubo.color = color;
 

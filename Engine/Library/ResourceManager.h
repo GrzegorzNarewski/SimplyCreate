@@ -1,10 +1,16 @@
-#include "Engine.h"
+#include "Input.h"
 
 namespace gll
 {
+    struct Model2DUBO
+    {
+        glm::mat4 model;
+        glm::vec4 color;
+    };
     struct ModelUBO
     {
         glm::mat4 model;
+        glm::mat4 view;
         glm::vec4 color;
     };
     struct LightUBO
@@ -15,6 +21,7 @@ namespace gll
     struct AnimModelUBO
     {
         glm::mat4 model[25];
+        glm::mat4 view;
     };
     struct TextUBO
     {
@@ -38,7 +45,7 @@ namespace gll
         VkPushConstantRange viewMatricesPushConstants = {
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,   // VkShaderStageFlags     stageFlags
             0,                              // uint32_t               offset
-            36 * sizeof( float )             // uint32_t               size
+            20 * sizeof( float )             // uint32_t               size
         };
 
         void deleteShaders();
@@ -85,5 +92,5 @@ namespace gll
         int findUBO(std::string name);
     };
 
-    extern ResourceManager resources;
+    ResourceManager* rManager();
 }
