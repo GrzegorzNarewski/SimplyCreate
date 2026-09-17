@@ -2,12 +2,6 @@
 
 namespace gll
 {
-    enum Camera_Type
-    {
-        FLYING,
-        WALKING,
-    };
-
     const float YAW =   0.0f;
     const float PITCH = 0.0f;
     const float SPEED = 8.0f;
@@ -24,11 +18,6 @@ namespace gll
         glm::vec3 Right, RightAhead;
         glm::vec3 WorldUp;
 
-        Camera_Type type = WALKING;
-
-        float width = 1.0f;
-        float height = 5.0f;
-
         float Yaw;
         float Pitch;
 
@@ -40,9 +29,6 @@ namespace gll
         float MouseSensitivity;
         float Zoom;
 
-        float staminaRegenTimer = 0.0f;
-        float stamina, maxStamina, staminaRegen, staminaUsage;
-
         void createCamera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
 
         glm::mat4 GetViewMatrix();
@@ -50,11 +36,9 @@ namespace gll
 
         void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
 
-        void ProcessMouseScroll(float yoffset);
-
         void updateCameraVectors();
-
-        void ProcessWalking(Window* window, float deltaTime);
-        void ProcessTopDownWalking(Window* window, float deltaTime);
     };
+
+    Camera* activeCamera();
+    void setActiveCamera(Camera* camera);
 }

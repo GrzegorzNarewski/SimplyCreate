@@ -8,17 +8,6 @@ namespace gll
 		return &win;
 	}
 
-	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-	{
-		win.width = width;
-		win.height = height;
-	}
-	void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-	{
-		win.mousePos.x = (((xpos * 2.0f) / win.width) - 1.0f) * ((float)win.width / (float)win.height);
-		win.mousePos.y = -(((ypos * 2.0f) / win.height) - 1.0f);
-	}
-
 	void Window::createWindow(std::string titles, unsigned int widths, unsigned int heights)
 	{
 		width = widths;

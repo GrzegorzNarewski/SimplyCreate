@@ -28,6 +28,22 @@ namespace gll
         glm::mat4 model;
         glm::vec4 color;
         int context;
+        int texturesizex;
+        int texturesizey;
+        float LetterWidth;
+    };
+
+    struct Transform
+    {
+        glm::vec3 position;
+        glm::vec3 size;
+        glm::vec3 rotation;
+
+        glm::mat4 outerModel;
+        glm::mat4 model;
+
+        Transform();
+        glm::mat4 getModel();
     };
 
     enum TEXT_LAYOUT
@@ -63,27 +79,25 @@ namespace gll
         std::map<std::string, Animation*> animations;
         std::map<std::string, Images*> textures;
         std::vector<Uniform> uniformBuffers;
+        std::vector<Data> fontData;
 
         std::vector<LightUBO> lightinfos;
 
         glm::mat4 proj2d, proj, view;
-        glm::vec3 viewPos;
         glm::vec2 mousePos;
 
         float maxX;
-        float lastFrame, deltaTime;
 
         void createResourceManager();
         void deleteResourceManager();
 
         void restartUBOs();
-        glm::mat4 calcModel(glm::vec3 pos, glm::vec3 size, glm::vec3 rot);
         void updateViewMatrices(Camera* camera, int width, int height);
 
         void renderSprite(std::string shader, std::string vBuffer, std::string texture, glm::vec3 pos, glm::vec3 size, glm::vec3 rot, glm::vec4 color, std::string currentRenderPass = "default");
         void renderMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, glm::vec3 pos, glm::vec3 size, glm::vec3 rot, glm::vec4 color, std::string currentRenderPass = "default", glm::mat4 outerModel = glm::mat4(1.0f));
         void renderAnimMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, std::vector<glm::mat4>& models, std::string currentRenderPass);
-        void renderText(std::string context, glm::vec3 pos, float fontsize, glm::vec4 color, std::string currentRenderPass, TEXT_LAYOUT layout, float xMostLeft);
+        void renderText(std::string context, Transform transform, glm::vec4 color, TEXT_LAYOUT layout, bool displaceXMax, std::string currentRenderPass = "default");
 
         Shader* findShader(std::string name, std::string renderPass);
         VertexBuffer* findVertexBuffer(std::string name); void deleteVertexBuffer(std::string name);

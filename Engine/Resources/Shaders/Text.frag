@@ -2,22 +2,22 @@
 
 layout(location = 0) in vec2 TexCoord;
 
-layout(location = 0) out vec4 outColor;
+layout(location = 0) out vec4 FragColor;
 
-layout(set = 0, binding = 2) uniform sampler2D texture1;
+layout(set = 0, binding = 1) uniform sampler2D image;
 
 layout(set = 0, binding = 0) uniform UniformBufferObject {
     mat4 model;
     vec4 color;
     int context;
+    int texturesizex;
+    int texturesizey;
+    float LetterWidth;
 };
-
-const vec3 Pos = {0.0f, 0.0f, 0.0f};
 
 void main()
 {
-    outColor = vec4(texture(texture1, TexCoord).xyz, 1.0f);
-    if(outColor.x == 0.0f)
-        discard;
-    outColor = vec4(color);
+	FragColor = texture(image, TexCoord);
+    if(FragColor.a < 0.9f) discard;
+	FragColor *= color;
 }

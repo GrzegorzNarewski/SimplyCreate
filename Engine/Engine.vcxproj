@@ -154,7 +154,6 @@
     <ClCompile Include="Library\Deleter.cpp" />
     <ClCompile Include="Library\Devices.cpp" />
     <ClCompile Include="Library\EngineManager.cpp" />
-    <ClCompile Include="Library\FileManager.cpp" />
     <ClCompile Include="Library\FrameBuffer.cpp" />
     <ClCompile Include="Library\Helper.cpp" />
     <ClCompile Include="Library\Images.cpp" />
@@ -180,7 +179,6 @@
     <ClInclude Include="Library\Deleter.h" />
     <ClInclude Include="Library\Devices.h" />
     <ClInclude Include="Library\EngineManager.h" />
-    <ClInclude Include="Library\FileManager.h" />
     <ClInclude Include="Library\FrameBuffer.h" />
     <ClInclude Include="Library\Helper.h" />
     <ClInclude Include="Library\Images.h" />

@@ -20,17 +20,18 @@ namespace gll
 	}
 	void EngineManager::updateEngine()
 	{
-		Camera camera;
-		camera.createCamera();
+		dTime()->refresh();
 		while (window()->isActive())
 		{
 			window()->updateWindow();
 
 			inputhandler()->updateHandler();
 
+			dTime()->updateDeltaTime();
+
 			stock()->beginRender();
 
-			rManager()->updateViewMatrices(&camera, window()->width, window()->height);
+			rManager()->updateViewMatrices(activeCamera(), window()->width, window()->height);
 			stock()->beginRecordCommandBuffer("default", "default");
 			update();
 			stock()->endRecordCommandBuffer();

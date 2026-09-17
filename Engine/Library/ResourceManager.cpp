@@ -2,10 +2,50 @@
 
 namespace gll
 {
+    glm::mat4 calcModel(glm::vec3 pos, glm::vec3 size, glm::vec3 rot)
+    {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
+        model = glm::scale(model, glm::vec3(size.x, size.y, size.z));
+        model = glm::rotate(model, glm::radians(rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(rot.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(rot.z), glm::vec3(0.0f, 0.0f, 1.0f));
+        return model;
+    }
+    Transform::Transform()
+    {
+        position = glm::vec3(0.0f);
+        size = glm::vec3(1.0f);
+        rotation = glm::vec3(0.0f);
+        outerModel = glm::mat4(1.0f);
+        model = glm::mat4(1.0f);
+    }
+    glm::mat4 Transform::getModel()
+    {
+        model = calcModel(position, size, rotation);
+        model = outerModel * model;
+        return model;
+    }
+
     ResourceManager resources;
     ResourceManager* rManager()
     {
         return &resources;
+    }
+
+    void framebuffer_size_callback(GLFWwindow* p_window, int width, int height)
+    {
+        window()->width = width;
+        window()->height = height;
+        stock()->framebufferResized = true;
+    }
+    void mouse_callback(GLFWwindow* p_window, double xpos, double ypos)
+    {
+        window()->mousePos.x = (((xpos * 2.0f) / window()->width) - 1.0f) * ((float)window()->width / (float)window()->height);
+        window()->mousePos.y = -(((ypos * 2.0f) / window()->height) - 1.0f);
+
+        if (activeCamera() != nullptr) {
+            activeCamera()->ProcessMouseMovement(xpos, ypos);
+        }
     }
 
     void ResourceManager::createResourceManager()
@@ -14,6 +54,8 @@ namespace gll
         lightinfos.push_back({});
         lightinfos[0].position = glm::vec4(2.5f, 3.0f, 0.1f, 1.0f);
         lightinfos[0].color = glm::vec4(1.0f);
+
+        fontData = gll::FileManager::readFile("Textures/Fonts/Font1Data.csv");
     }
 
     void ResourceManager::restartUBOs()
@@ -32,18 +74,21 @@ namespace gll
 	{
         maxX = (float)((float)width/(float)height);
 
-        view = camera->GetViewMatrix();
-        proj = glm::perspective(glm::radians(camera->Zoom), maxX, 0.2f, 1000000.0f);
+        glm::vec4 camPos;
+        if (camera != nullptr) {
+            view = camera->GetViewMatrix();
+            proj = glm::perspective(glm::radians(camera->Zoom), maxX, 0.01f, 1000.0f);
+            camPos = glm::vec4(camera->Position, 1.0f);
+        }
+        else {
+            camPos = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        }
 
-        viewPos = camera->Position;
         proj2d = glm::ortho(-maxX, maxX, -1.0f, 1.0f, -100.0f, 100.0f);
 
         glm::vec2 tmpMP = window()->mousePos;
-
         mousePos.x = ((tmpMP.x / window()->width) * 2.0f) - 1.0f;
         mousePos.y = ((tmpMP.y / window()->height) * 2.0f) - 1.0f;
-
-        glm::vec4 camPos = glm::vec4(camera->Position, 1.0f);
 
         for(auto r : shaders) {
             for(auto s : r.second) {
@@ -79,7 +124,7 @@ namespace gll
 
         std::string descript = "Buffer-Image", vInp = "Vertex";
 
-        std::vector<File_Data> data = FileManager::readFile("Shaders/details/" + name + ".save");
+        std::vector<File_Data> data = FileManager::readFilez("Shaders/details/" + name + ".save");
 
         for(int i=0; i<data.size(); i++) {
             if(data[i].title == "descriptor") {
@@ -169,16 +214,6 @@ namespace gll
         return decId;
 	}
 
-	glm::mat4 ResourceManager::calcModel(glm::vec3 pos, glm::vec3 size, glm::vec3 rot)
-	{
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
-		model = glm::scale(model, glm::vec3(size.x, size.y, size.z));
-		model = glm::rotate(model, glm::radians(rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(rot.y), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(rot.z), glm::vec3(0.0f, 0.0f, 1.0f));
-		return model;
-	}
-
     void ResourceManager::renderMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, glm::vec3 pos, glm::vec3 size, glm::vec3 rot, glm::vec4 color, std::string currentRenderPass, glm::mat4 outerModel)
     {
 	    Shader* tmpS = findShader(shader, currentRenderPass);
@@ -252,16 +287,47 @@ namespace gll
 
         renderVBuffer(vBuffer, tmpS, decId, proj2d);
     }
-    void ResourceManager::renderText(std::string context, glm::vec3 pos, float fontsize, glm::vec4 color, std::string currentRenderPass, TEXT_LAYOUT layout, float xMostLeft)
+    Data* findData(std::string name)
+    {
+        for (int i = 0; i < rManager()->fontData.size(); i++) {
+            if (rManager()->fontData[i].name == name) {
+                return &rManager()->fontData[i];
+            }
+        }
+        return &rManager()->fontData[0];
+    }
+    float findTextOffset(Transform transform, std::string context)
+    {
+        Transform tmp = transform;
+        float leftMost = 0.0f;
+
+        float cellSizex = std::atof(findData("Cell Width")->data.c_str());
+        float previousSize = 0.0f;
+        float fullSize = 0.0f;
+        for (int i = 0; i < context.size(); i++) {
+            float letterWidth = std::atof(findData("Char " + std::to_string((int)context[i]) + " Base Width")->data.c_str());
+
+            transform.size.x = tmp.size.x * (letterWidth / cellSizex);
+            transform.position.x += (previousSize + transform.size.x);
+            if (i == 0) leftMost = transform.position.x - (transform.size.x);
+            previousSize = transform.size.x;
+
+            fullSize += transform.size.x;
+        }
+        float rightMost = transform.position.x + (transform.size.x);
+        float toReturn = (rightMost - leftMost) / 2.0f;
+
+        return toReturn;
+    }
+    void ResourceManager::renderText(std::string context, Transform transform, glm::vec4 color, TEXT_LAYOUT layout, bool displaceXMax, std::string currentRenderPass)
     {
 	    Shader* tmpS = findShader("text", currentRenderPass);
 
 	    std::string uboName = "MODEL_SQUAREtext bitmapfont.png";
 
         TextUBO ubo;
-        ubo.color = color;
 
-        glm::vec3 poses = glm::vec3(pos.x - (fontsize*2.2f), pos.y, pos.z);
+        /*glm::vec3 poses = glm::vec3(pos.x - (fontsize * 2.2f), pos.y, pos.z);
 
         if(layout == CENTERED)
             poses.x -= (fontsize * 2.2f) * ((float)(context.size() - 1) / 2.0f);
@@ -288,10 +354,9 @@ namespace gll
                     poses.y += fontsize*4.2f;
                     poses.x = pos.x - (fontsize*2.2f) - (fontsize / 2.0f);
                 }
-            }
-
+            }           
+            
             glm::mat4 model = calcModel(poses, glm::vec3(fontsize, fontsize*2.0f, fontsize), glm::vec3(0.0f));
-
             ubo.model = model;
             ubo.context = context[i];
 
@@ -299,8 +364,41 @@ namespace gll
             uniformBuffers[decId].updateUniformBuffer(stock()->devices, stock()->imageIndex);
 
             renderVBuffer("square", tmpS, decId, proj2d);
+        }*/
+
+        if (displaceXMax) {
+            transform.position.x = maxX - transform.position.x;
         }
 
+        float cellSizex = std::atof(findData("Cell Width")->data.c_str());
+
+        if (layout == LEFT) {
+            float textcenterpos = findTextOffset(transform, context);
+            transform.position.x -= textcenterpos;
+        }
+        float previousSize = 0.0f;
+        float originalSize = transform.size.x;
+        for (int i = 0; i < context.size(); i++) {
+            int decId = findUBOToUse(uboName, tmpS, { "Fonts/Font1.png" }, { sizeof(TextUBO) });
+
+            float letterWidth = std::atof(findData("Char " + std::to_string((int)context[i]) + " Base Width")->data.c_str());
+
+            transform.size.x = originalSize * (letterWidth / cellSizex);
+            transform.position.x += (previousSize + transform.size.x);
+            previousSize = transform.size.x;
+
+            ubo.model = transform.getModel();
+            ubo.context = context[i];
+            ubo.color = color;
+            ubo.texturesizex = std::atof(findData("Image Width")->data.c_str());
+            ubo.texturesizey = std::atof(findData("Image Height")->data.c_str());
+            ubo.LetterWidth = letterWidth;
+
+            uniformBuffers[decId].bufferdata[0].data = &ubo;
+            uniformBuffers[decId].updateUniformBuffer(stock()->devices, stock()->imageIndex);
+
+            renderVBuffer("square", tmpS, decId, proj2d);
+        }
     }
 
     void ResourceManager::deleteResourceManager()

@@ -1,94 +1,63 @@
 #version 450
 
 layout( triangles ) in;
-layout( triangle_strip, max_vertices = 3 ) out;
+layout( triangle_strip, max_vertices = 5 ) out;
 
-layout(location = 0) in int context[];
-layout(location = 1) in vec2 TextCoords[];
+layout(set = 0, binding = 0) uniform UniformBufferObject {
+    mat4 model;
+    vec4 color;
+    int context;
+    int texturesizex;
+    int texturesizey;
+    float LetterWidth;
+};
 
-layout(location = 0) out vec2 TexCoords;
+layout(location = 0) in vec2 TexCoords[3];
 
-vec2 getTextureCoordinate(vec2 origin);
+layout(location = 0) out vec2 TexCoord;
 
-void main() {
-    gl_Position = gl_in[0].gl_Position;
-    TexCoords = getTextureCoordinate(TextCoords[0]);
-    EmitVertex();
+void build_letter(vec2 Tex, vec4 position)
+{    
+	const float lettersizex = 16, lettersizey = 32;
+	//float texturesizex = 256, texturesizey = 256;
+	const float LetterHeight = 4;
 
-    gl_Position = gl_in[1].gl_Position;
-    TexCoords = getTextureCoordinate(TextCoords[1]);
-    EmitVertex();
+	float avgletterRealSizex = lettersizex / texturesizex, avgletterRealSizey = lettersizey / texturesizey;
+	float letterRealSizex = LetterWidth / texturesizex, letterRealSizey = LetterHeight / texturesizey;
 
-    gl_Position = gl_in[2].gl_Position;
-    if(TextCoords[2].x == 1.0f && TextCoords[2].y == 1.0f)
-    {
-        TexCoords = getTextureCoordinate(TextCoords[2]);
-    }
-    else if(TextCoords[2].x == 0.0f && TextCoords[2].y == 0.0f)
-    {
-        TexCoords = getTextureCoordinate(TextCoords[2]);
-    }
-    EmitVertex();
+	float x=context-32, y=0;
+	while(x >= texturesizex/lettersizex) {
+		x -= texturesizex/lettersizex;
+		y ++;
+	}
 
-    EndPrimitive();
+	float letterPositionx = avgletterRealSizex * x, letterPositiony = avgletterRealSizey * y;
+
+	if(Tex.x == 0.0f && Tex.y == 0.0f) {
+		gl_Position = position;
+		TexCoord = vec2(letterPositionx                  , letterPositiony + letterRealSizey);
+   		EmitVertex(); 
+	}
+	if(Tex.x == 1.0f && Tex.y == 0.0f) {
+		gl_Position = position;
+		TexCoord = vec2(letterPositionx + letterRealSizex, letterPositiony + letterRealSizey);
+   		EmitVertex(); 
+	}
+	if(Tex.x == 0.0f && Tex.y == 1.0f) {
+		gl_Position = position;
+		TexCoord = vec2(letterPositionx                  , letterPositiony + avgletterRealSizey - 0.05f);
+   		EmitVertex(); 
+	}
+	if(Tex.x == 1.0f && Tex.y == 1.0f) {
+		gl_Position = position;
+		TexCoord = vec2(letterPositionx + letterRealSizex, letterPositiony + avgletterRealSizey- 0.05f);
+   		EmitVertex(); 
+	}
 }
 
-vec2 getTextureCoordinate(vec2 origin)
-{
-    if(origin.x == 0.0f && origin.y == 0.0f) {
-        int xx = context[0];
-        int yy = 0;
-        while(xx > 17) {
-            xx -= 18;
-            yy++;
-        }
-        float x = 2.0f + (14 * xx);
-        x /= 256.0f;
-
-        float y = 2.0f + (18 * yy);
-        y /= 128.0f;
-        return vec2(x, y);
-    }
-    if(origin.x == 1.0f && origin.y == 0.0f) {
-        int xx = context[0];
-        int yy = 0;
-        while(xx > 17) {
-            xx -= 18;
-            yy++;
-        }
-        float x = 12.0f + (14 * xx);
-        x /= 256.0f;
-
-        float y = 2.0f + (18 * yy);
-        y /= 128.0f;
-        return vec2(x, y);
-    }
-    if(origin.x == 0.0f && origin.y == 1.0f) {
-        int xx = context[0];
-        int yy = 0;
-        while(xx > 17) {
-            xx -= 18;
-            yy++;
-        }
-        float x = 2.0f + (14 * xx);
-        x /= 256.0f;
-
-        float y = 16.0f + (18 * yy);
-        y /= 128.0f;
-        return vec2(x, y);
-    }
-    if(origin.x == 1.0f && origin.y == 1.0f) {
-        int xx = context[0];
-        int yy = 0;
-        while(xx > 17) {
-            xx -= 18;
-            yy++;
-        }
-        float x = 12.0f + (14 * xx);
-        x /= 256.0f;
-
-        float y = 16.0f + (18 * yy);
-        y /= 128.0f;
-        return vec2(x, y);
-    }
+void main() {    
+    build_letter(TexCoords[0], gl_in[0].gl_Position);
+	build_letter(TexCoords[1], gl_in[1].gl_Position);
+	build_letter(TexCoords[2], gl_in[2].gl_Position);
+	EndPrimitive();
 }
