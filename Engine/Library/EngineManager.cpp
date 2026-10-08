@@ -13,10 +13,10 @@ namespace gll
 		update = p_update;
 
 		stock()->createStock();
-
 		rManager()->createResourceManager();
-
 		inputhandler()->createHandler(window());
+
+		scenes["default"].createScene();
 	}
 	void EngineManager::updateEngine()
 	{
@@ -29,14 +29,17 @@ namespace gll
 
 			dTime()->updateDeltaTime();
 
+
 			stock()->beginRender();
 
-			rManager()->updateViewMatrices(activeCamera(), window()->width, window()->height);
 			stock()->beginRecordCommandBuffer("default", "default");
 			update();
+			rManager()->updateViewMatrices(activeCamera(), window()->width, window()->height);
+			scenes["default"].updateScene();
 			stock()->endRecordCommandBuffer();
 
 			stock()->submitRender(true);
+
 
 			rManager()->restartUBOs();
 		}
@@ -46,5 +49,14 @@ namespace gll
 		stock()->WaitDeviceIdle();
 		rManager()->deleteResourceManager();
 		stock()->deleteStock();
+	}
+
+	void EngineManager::addObject(std::string scene, Object* object)
+	{
+		scenes[scene].addObject(object->name(), object);
+	}
+	void EngineManager::removeObject(std::string scene, std::string name)
+	{
+		scenes[scene].removeObject(name);
 	}
 }

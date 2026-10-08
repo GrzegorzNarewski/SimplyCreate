@@ -1,7 +1,7 @@
 #version 450
 
 layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 innormal;
+layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTexCoord;
 layout(location = 3) in vec4 inWeights;
 layout(location = 4) in ivec4 inJoints;
@@ -12,12 +12,14 @@ layout(location = 1) out vec3 Normal;
 layout(location = 2) out vec3 FragPos;
 
 layout(set = 0, binding = 0) uniform UniformBufferObject {
+    mat4 view;
+    vec4 color;
     mat4 animeModels[25];
 };
 
 layout( push_constant ) uniform ColorBlock {
-  mat4 view;
   mat4 proj;
+  vec4 camPos;
 };
 
 void main() 
@@ -30,8 +32,8 @@ void main()
             vec4 posePosition = animeModels[inJoints[i]] * vec4(inPosition, 1.0f);
             totalPos += posePosition * inWeights[i];
 
-            vec4 worldNormal = animeModels[inJoints[i]] * vec4(innormal, 1.0f);
-            totalNor += worldNormal;
+            vec4 poseNormal = transpose(inverse(animeModels[inJoints[i]])) * vec4(inNormal, 1.0f);
+            totalNor += poseNormal * inWeights[i];
         }
         else break;
     }

@@ -18,6 +18,6 @@ layout(set = 0, binding = 0) uniform UniformBufferObject {
 void main()
 {
 	FragColor = texture(image, TexCoord);
-    if(FragColor.a < 0.9f) discard;
-	FragColor *= color;
+    if(FragColor.a < 0.5f) discard;
+	FragColor = color;
 }

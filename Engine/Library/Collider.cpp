@@ -2,6 +2,16 @@
 
 namespace gll
 {
+    void CollisionMesh::createCollisionMesh(std::string vBufferName, glm::mat4& p_model)
+    {
+        vBuffer = rManager()->findVertexBuffer(vBufferName);
+        model = &p_model;
+    }
+    collisionStruct CollisionMesh::doCollisions(glm::vec3 Dir, glm::vec3 Pos)
+    {
+        return Collider::doCollisions(vBuffer->vertices, vBuffer->indices, model[0], Dir, Pos);
+    }
+
     collisionStruct Collider::doCollisions(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, glm::mat4 model, glm::vec3 Dir, glm::vec3 Pos)
     {
         double vv_0, vv_1, vv_v, kat_0, kat_1, kat_2;

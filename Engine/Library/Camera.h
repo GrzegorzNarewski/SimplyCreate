@@ -29,6 +29,8 @@ namespace gll
         float MouseSensitivity;
         float Zoom;
 
+        bool freezeCameraMouseMovement = false;
+
         void createCamera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
 
         glm::mat4 GetViewMatrix();

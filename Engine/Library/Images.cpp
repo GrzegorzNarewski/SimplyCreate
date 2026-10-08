@@ -105,6 +105,7 @@ namespace gll
 
         if (!pixels) {
             std::string tmp = path;
+            std::cout << "failed to load texture image: " + tmp << std::endl;
             throw std::runtime_error("failed to load texture image: " + tmp);
         }
 

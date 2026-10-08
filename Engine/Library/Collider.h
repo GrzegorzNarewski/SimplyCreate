@@ -20,6 +20,16 @@ namespace gll
         }
     };
 
+    class CollisionMesh
+    {
+    public:
+        VertexBuffer* vBuffer;
+        glm::mat4* model;
+
+        void createCollisionMesh(std::string vBufferName, glm::mat4& model);
+        collisionStruct doCollisions(glm::vec3 Dir, glm::vec3 Pos);
+    };
+
     class Collider
     {
     public:

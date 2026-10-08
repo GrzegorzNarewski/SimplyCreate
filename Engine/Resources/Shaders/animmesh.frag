@@ -10,6 +10,8 @@ layout(set = 0, binding = 2) uniform sampler2D diffuseMap;
 layout(set = 0, binding = 3) uniform sampler2D emissionMap;
 
 layout(set = 0, binding = 0) uniform UniformBufferObject {
+    mat4 view;
+    vec4 color;
     mat4 animeModels[25];
 };
 
@@ -19,7 +21,6 @@ layout(set = 0, binding = 1) uniform UniformBufferObject2 {
 };
 
 layout( push_constant ) uniform ColorBlock {
-  mat4 view;
   mat4 proj;
   vec4 camPos;
 };
@@ -72,6 +73,8 @@ void main()
     vec4 lightingResult = vec4(ambient + diffuse + emission, 1.0f);
     lightingResult += doPointLight(light_pos.xyz, light_color.xyz);
 
-    vec4 result = texture(diffuseMap, TexCoords) * lightingResult;
+    vec4 diffuseTexture = texture(diffuseMap, TexCoords);
+    vec4 result = diffuseTexture * color * lightingResult;
+    result.a = diffuseTexture.a * color.a;
     FragColor = result;
 }

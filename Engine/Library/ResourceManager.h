@@ -20,8 +20,9 @@ namespace gll
     };
     struct AnimModelUBO
     {
-        glm::mat4 model[25];
         glm::mat4 view;
+        glm::vec4 color;
+        glm::mat4 model[25];
     };
     struct TextUBO
     {
@@ -93,11 +94,12 @@ namespace gll
 
         void restartUBOs();
         void updateViewMatrices(Camera* camera, int width, int height);
+        float findTextSize(Transform transform, std::string context);
 
-        void renderSprite(std::string shader, std::string vBuffer, std::string texture, glm::vec3 pos, glm::vec3 size, glm::vec3 rot, glm::vec4 color, std::string currentRenderPass = "default");
-        void renderMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, glm::vec3 pos, glm::vec3 size, glm::vec3 rot, glm::vec4 color, std::string currentRenderPass = "default", glm::mat4 outerModel = glm::mat4(1.0f));
-        void renderAnimMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, std::vector<glm::mat4>& models, std::string currentRenderPass);
-        void renderText(std::string context, Transform transform, glm::vec4 color, TEXT_LAYOUT layout, bool displaceXMax, std::string currentRenderPass = "default");
+        void renderSprite(std::string shader, std::string vBuffer, std::string texture, Transform& transform, glm::vec4 color, std::string currentRenderPass = "default", std::map<std::string, void*> ubo_addons = {});
+        void renderMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, Transform transform, glm::vec4 color, std::string currentRenderPass = "default", std::map<std::string, void*> ubo_addons = {});
+        void renderAnimMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, std::vector<glm::mat4>& models, glm::vec4 color, std::string currentRenderPass = "default", std::map<std::string, void*> ubo_addons = {});
+        void renderText(std::string context, Transform transform, glm::vec4 color, TEXT_LAYOUT layout, std::string currentRenderPass = "default", std::map<std::string, void*> ubo_addons = {});
 
         Shader* findShader(std::string name, std::string renderPass);
         VertexBuffer* findVertexBuffer(std::string name); void deleteVertexBuffer(std::string name);

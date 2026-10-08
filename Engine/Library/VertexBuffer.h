@@ -77,6 +77,14 @@ namespace gll
 
         Heir heir;
 
+        // bounding box
+        void calcBoundingBox();
+        void calcAnimBoundingBox();
+        glm::vec3 boundingBoxPosition;
+        glm::vec3 boundingBoxSize;
+        glm::vec3 getBoundingBoxPos();
+        glm::vec3 getBoundingBoxSize();
+
         VertexBuffer() {};
         VertexBuffer(std::string Name, Devices &devices, VkCommandPool &commandPool);
         VertexBuffer(std::string name, Devices &devices, VkCommandPool &commandPool, std::vector<Vertex>& points);
@@ -87,9 +95,6 @@ namespace gll
         void deleteVertexBuffer(Devices &devices);
 
         void renderVertexBuffer(VkCommandBuffer &commandbuffer);
-
-        glm::vec3 findObjectSize();
-        glm::vec3 findObjectPos();
 
         void bindVertexBuffer(VkCommandBuffer &commandbuffer);
     };

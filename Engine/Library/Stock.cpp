@@ -40,17 +40,31 @@ namespace gll
         }
 
         std::vector<VkDescriptorSetLayoutBinding> bindings = { Shader::createUboLayout(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT),
-                                                              Shader::createUboLayout(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT) };
+                                                               Shader::createUboLayout(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT) };
         descriptorSetLayouts["Buffer-Image"] = Shader::createDescriptorSetLayout(devices, "Buffer-Image", bindings, 0);
+
         std::vector<VkDescriptorSetLayoutBinding> bindings2 = { Shader::createUboLayout(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT),
-                                                               Shader::createUboLayout(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT),
-                                                               Shader::createUboLayout(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT) };
+                                                                Shader::createUboLayout(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT),
+                                                                Shader::createUboLayout(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT) };
         descriptorSetLayouts["Buffer-Image-Image"] = Shader::createDescriptorSetLayout(devices, "Buffer-Image-Image", bindings2, 1);
+
         std::vector<VkDescriptorSetLayoutBinding> bindings3 = { Shader::createUboLayout(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT),
-                                                               Shader::createUboLayout(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT),
-                                                               Shader::createUboLayout(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT),
-                                                               Shader::createUboLayout(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT) };
-        descriptorSetLayouts["Buffer-Buffer-Image-Image"] = Shader::createDescriptorSetLayout(devices, "Buffer-Buffer-Image-Image", bindings3, 1);
+                                                                Shader::createUboLayout(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT),
+                                                                Shader::createUboLayout(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT),
+                                                                Shader::createUboLayout(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT) };
+        descriptorSetLayouts["Buffer-Buffer-Image-Image"] = Shader::createDescriptorSetLayout(devices, "Buffer-Buffer-Image-Image", bindings3, 2);
+
+        std::vector<VkDescriptorSetLayoutBinding> bindings4 = { Shader::createUboLayout(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT),
+                                                                Shader::createUboLayout(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT),
+                                                                Shader::createUboLayout(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT) };
+        descriptorSetLayouts["Buffer-Buffer-Image"] = Shader::createDescriptorSetLayout(devices, "Buffer-Buffer-Image", bindings4, 3);
+
+        std::vector<VkDescriptorSetLayoutBinding> bindings5 = { Shader::createUboLayout(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT),
+                                                                Shader::createUboLayout(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT),
+                                                                Shader::createUboLayout(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT),
+                                                                Shader::createUboLayout(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT),
+                                                                Shader::createUboLayout(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT) };
+        descriptorSetLayouts["Buffer-Buffer-Image-Image-Image"] = Shader::createDescriptorSetLayout(devices, "Buffer-Buffer-Image-Image-Image", bindings5, 4);
 
         bgColor = glm::vec3(0.15f);
 	}

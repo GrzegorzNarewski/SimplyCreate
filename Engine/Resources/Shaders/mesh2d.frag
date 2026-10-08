@@ -13,6 +13,6 @@ layout(set = 0, binding = 0) uniform UniformBufferObject {
 void main()
 {
     vec4 result = texture(diffuse, TexCoords);
-    //if(result.a < 0.7f) discard;
+    if(result.a < 0.7f) discard;
     FragColor = vec4(result) * color;
 }

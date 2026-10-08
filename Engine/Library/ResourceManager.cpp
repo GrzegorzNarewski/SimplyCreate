@@ -22,7 +22,7 @@ namespace gll
     glm::mat4 Transform::getModel()
     {
         model = calcModel(position, size, rotation);
-        model = outerModel * model;
+        model *= outerModel;
         return model;
     }
 
@@ -44,7 +44,9 @@ namespace gll
         window()->mousePos.y = -(((ypos * 2.0f) / window()->height) - 1.0f);
 
         if (activeCamera() != nullptr) {
-            activeCamera()->ProcessMouseMovement(xpos, ypos);
+            if (!activeCamera()->freezeCameraMouseMovement) {
+                activeCamera()->ProcessMouseMovement(xpos, ypos);
+            }
         }
     }
 
@@ -77,7 +79,7 @@ namespace gll
         glm::vec4 camPos;
         if (camera != nullptr) {
             view = camera->GetViewMatrix();
-            proj = glm::perspective(glm::radians(camera->Zoom), maxX, 0.01f, 1000.0f);
+            proj = glm::perspective(glm::radians(camera->Zoom), maxX, 0.001f, 1000.0f);
             camPos = glm::vec4(camera->Position, 1.0f);
         }
         else {
@@ -118,9 +120,9 @@ namespace gll
             }
         }
 
-        std::string path1 = "Resources/Shaders/" + name + "_vert.spv";
-        std::string path2 = "Resources/Shaders/" + name + "_frag.spv";
-        std::string path3 = "Resources/Shaders/" + name + "_geom.spv";
+        std::string path1 = "Resources/Shaders/compiled/" + name + "_vert.spv";
+        std::string path2 = "Resources/Shaders/compiled/" + name + "_frag.spv";
+        std::string path3 = "Resources/Shaders/compiled/" + name + "_geom.spv";
 
         std::string descript = "Buffer-Image", vInp = "Vertex";
 
@@ -214,18 +216,22 @@ namespace gll
         return decId;
 	}
 
-    void ResourceManager::renderMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, glm::vec3 pos, glm::vec3 size, glm::vec3 rot, glm::vec4 color, std::string currentRenderPass, glm::mat4 outerModel)
+    void ResourceManager::renderMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, Transform transform, glm::vec4 color, std::string currentRenderPass, std::map<std::string, void*> ubo_addons)
     {
 	    Shader* tmpS = findShader(shader, currentRenderPass);
 
 	    std::string uboName = "MODEL_SQUARE" + shader + " ";
 	    for(int i=0; i<texts.size(); i++) { uboName += texts[i]; }
-        int decId = findUBOToUse(uboName, tmpS, texts, {sizeof(ModelUBO), sizeof(LightUBO)});
+        std::vector<std::size_t> ubo_sizes = { sizeof(ModelUBO), sizeof(LightUBO) };
+        for (auto& ubo_addon : ubo_addons) {
+            ubo_sizes.push_back(sizeof(ubo_addon.second));
+        }
+        int decId = findUBOToUse(uboName, tmpS, texts, ubo_sizes);
 
-        glm::mat4 model = calcModel(pos, size, rot);
+        glm::mat4 model = transform.getModel();
 
         ModelUBO ubo;
-        ubo.model = model * outerModel;
+        ubo.model = model;
         ubo.view = view;
         ubo.color = color;
         uniformBuffers[decId].bufferdata[0].data = &ubo;
@@ -240,23 +246,33 @@ namespace gll
         }
         uniformBuffers[decId].bufferdata[1].data = &ubo2;
 
+        int kk = 2;
+        for (auto& ubo_addon : ubo_addons) {
+            uniformBuffers[decId].bufferdata[kk].data = &ubo_addon.second;
+            kk++;
+        }
         uniformBuffers[decId].updateUniformBuffer(stock()->devices, stock()->imageIndex);
 
         renderVBuffer(vBuffer, tmpS, decId, proj);
     }
-    void ResourceManager::renderAnimMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, std::vector<glm::mat4>& models, std::string currentRenderPass)
+    void ResourceManager::renderAnimMesh(std::string shader, std::string vBuffer, std::vector<std::string> texts, std::vector<glm::mat4>& models, glm::vec4 color, std::string currentRenderPass, std::map<std::string, void*> ubo_addons)
     {
 	    Shader* tmpS = findShader(shader, currentRenderPass);
 
 	    std::string uboName = "MODEL_SQUARE" + shader + " ";
 	    for(int i=0; i<texts.size(); i++) { uboName += texts[i]; }
-        int decId = findUBOToUse(uboName, tmpS, texts, {sizeof(AnimModelUBO), sizeof(LightUBO)});
+        std::vector<std::size_t> ubo_sizes = { sizeof(AnimModelUBO), sizeof(LightUBO) };
+        for (auto& ubo_addon : ubo_addons) {
+            ubo_sizes.push_back(sizeof(ubo_addon.second));
+        }
+        int decId = findUBOToUse(uboName, tmpS, texts, ubo_sizes);
 
         AnimModelUBO ubo;
         for(int i=0; i<models.size(); i++) {
             ubo.model[i] = models[i];
         }
         ubo.view = view;
+        ubo.color = color;
         uniformBuffers[decId].bufferdata[0].data = &ubo;
 
         LightUBO ubo2;
@@ -265,24 +281,38 @@ namespace gll
         }
         uniformBuffers[decId].bufferdata[1].data = &ubo2;
 
+        int kk = 2;
+        for (auto& ubo_addon : ubo_addons) {
+            uniformBuffers[decId].bufferdata[kk].data = &ubo_addon.second;
+            kk++;
+        }
         uniformBuffers[decId].updateUniformBuffer(stock()->devices, stock()->imageIndex);
 
         renderVBuffer(vBuffer, tmpS, decId, proj);
     }
-    void ResourceManager::renderSprite(std::string shader, std::string vBuffer, std::string texture, glm::vec3 pos, glm::vec3 size, glm::vec3 rot, glm::vec4 color, std::string currentRenderPass)
+    void ResourceManager::renderSprite(std::string shader, std::string vBuffer, std::string texture, Transform& transform, glm::vec4 color, std::string currentRenderPass, std::map<std::string, void*> ubo_addons)
     {
 	    Shader* tmpS = findShader(shader, currentRenderPass);
 
 	    std::string uboName = "MODEL_SQUARE" + shader + " " + texture;
-        int decId = findUBOToUse(uboName, tmpS, {texture}, {sizeof(Model2DUBO)});
+        std::vector<std::size_t> ubo_sizes = { sizeof(Model2DUBO) };
+        for (auto& ubo_addon : ubo_addons) {
+            ubo_sizes.push_back(sizeof(ubo_addon.second));
+        }
+        int decId = findUBOToUse(uboName, tmpS, { texture }, ubo_sizes);
 
-        glm::mat4 model = calcModel(pos, size, rot);
+        glm::mat4 model = transform.getModel();
 
         Model2DUBO ubo;
         ubo.model = model;
         ubo.color = color;
 
         uniformBuffers[decId].bufferdata[0].data = &ubo;
+        int kk = 1;
+        for (auto& ubo_addon : ubo_addons) {
+            uniformBuffers[decId].bufferdata[kk].data = ubo_addon.second;
+            kk++;
+        }
         uniformBuffers[decId].updateUniformBuffer(stock()->devices, stock()->imageIndex);
 
         renderVBuffer(vBuffer, tmpS, decId, proj2d);
@@ -296,7 +326,7 @@ namespace gll
         }
         return &rManager()->fontData[0];
     }
-    float findTextOffset(Transform transform, std::string context)
+    float ResourceManager::findTextSize(Transform transform, std::string context)
     {
         Transform tmp = transform;
         float leftMost = 0.0f;
@@ -319,7 +349,7 @@ namespace gll
 
         return toReturn;
     }
-    void ResourceManager::renderText(std::string context, Transform transform, glm::vec4 color, TEXT_LAYOUT layout, bool displaceXMax, std::string currentRenderPass)
+    void ResourceManager::renderText(std::string context, Transform transform, glm::vec4 color, TEXT_LAYOUT layout, std::string currentRenderPass, std::map<std::string, void*> ubo_addons)
     {
 	    Shader* tmpS = findShader("text", currentRenderPass);
 
@@ -327,58 +357,19 @@ namespace gll
 
         TextUBO ubo;
 
-        /*glm::vec3 poses = glm::vec3(pos.x - (fontsize * 2.2f), pos.y, pos.z);
-
-        if(layout == CENTERED)
-            poses.x -= (fontsize * 2.2f) * ((float)(context.size() - 1) / 2.0f);
-        else if(layout == LEFT)
-            poses.x -= (fontsize / 2.0f);
-
-        for(int i=0;i<context.size(); i++) {
-            int decId = findUBOToUse(uboName, tmpS, {"bitmapfont.png"}, {sizeof(TextUBO)});
-
-            poses.x += fontsize*2.2f;
-
-            if(context[i] == ' ') {
-                float xOnward = 0.0f;
-                for(int j=i+1; j<context.size(); j++) {
-                    if(context[j] == ' ') {
-                        break;
-                    }
-                    else {
-                        xOnward += fontsize*2.2f;
-                    }
-                }
-
-                if(poses.x + xOnward >= xMostLeft) {
-                    poses.y += fontsize*4.2f;
-                    poses.x = pos.x - (fontsize*2.2f) - (fontsize / 2.0f);
-                }
-            }           
-            
-            glm::mat4 model = calcModel(poses, glm::vec3(fontsize, fontsize*2.0f, fontsize), glm::vec3(0.0f));
-            ubo.model = model;
-            ubo.context = context[i];
-
-            uniformBuffers[decId].bufferdata[0].data = &ubo;
-            uniformBuffers[decId].updateUniformBuffer(stock()->devices, stock()->imageIndex);
-
-            renderVBuffer("square", tmpS, decId, proj2d);
-        }*/
-
-        if (displaceXMax) {
-            transform.position.x = maxX - transform.position.x;
-        }
-
         float cellSizex = std::atof(findData("Cell Width")->data.c_str());
 
-        if (layout == LEFT) {
-            float textcenterpos = findTextOffset(transform, context);
+        if (layout == CENTERED) {
+            float textcenterpos = findTextSize(transform, context);
             transform.position.x -= textcenterpos;
         }
         float previousSize = 0.0f;
         float originalSize = transform.size.x;
         for (int i = 0; i < context.size(); i++) {
+            std::vector<std::size_t> ubo_sizes = { sizeof(Model2DUBO) };
+            for (auto& ubo_addon : ubo_addons) {
+                ubo_sizes.push_back(sizeof(ubo_addon.second));
+            }
             int decId = findUBOToUse(uboName, tmpS, { "Fonts/Font1.png" }, { sizeof(TextUBO) });
 
             float letterWidth = std::atof(findData("Char " + std::to_string((int)context[i]) + " Base Width")->data.c_str());
@@ -395,6 +386,11 @@ namespace gll
             ubo.LetterWidth = letterWidth;
 
             uniformBuffers[decId].bufferdata[0].data = &ubo;
+            int kk = 1;
+            for (auto& ubo_addon : ubo_addons) {
+                uniformBuffers[decId].bufferdata[kk].data = &ubo_addon.second;
+                kk++;
+            }
             uniformBuffers[decId].updateUniformBuffer(stock()->devices, stock()->imageIndex);
 
             renderVBuffer("square", tmpS, decId, proj2d);

@@ -48,56 +48,66 @@ namespace gll
             createVertexBuffer(devices, commandPool);
         }
     }
-    glm::vec3 VertexBuffer::findObjectSize()
+
+    void VertexBuffer::calcBoundingBox()
     {
-        glm::vec3 toReturn;
-        glm::vec3 largest = glm::vec3(0.0f), smallest = glm::vec3(0.0f);
-        for(int i=0;i<vertices.size();i++){
-            if(largest.x < vertices[i].pos.x)
-                largest.x = vertices[i].pos.x;
-            else if(smallest.x > vertices[i].pos.x)
-                smallest.x = vertices[i].pos.x;
+        if (vertices.size() >= 2) {
+            glm::vec3 largest = glm::vec3(vertices[0].pos), smallest = glm::vec3(vertices[0].pos);
+            for (int i = 1; i < vertices.size(); i++) {
+                if (vertices[i].pos.x > largest.x)
+                    largest.x = vertices[i].pos.x;
+                else if (vertices[i].pos.x < smallest.x)
+                    smallest.x = vertices[i].pos.x;
 
-            if(largest.y < vertices[i].pos.y)
-                largest.y = vertices[i].pos.y;
-            else if(smallest.y > vertices[i].pos.y)
-                smallest.y = vertices[i].pos.y;
+                if (vertices[i].pos.y > largest.y)
+                    largest.y = vertices[i].pos.y;
+                else if (vertices[i].pos.y < smallest.y)
+                    smallest.y = vertices[i].pos.y;
 
-            if(largest.z < vertices[i].pos.z)
-                largest.z = vertices[i].pos.z;
-            else if(smallest.z > vertices[i].pos.z)
-                smallest.z = vertices[i].pos.z;
+                if (vertices[i].pos.z > largest.z)
+                    largest.z = vertices[i].pos.z;
+                else if (vertices[i].pos.z < smallest.z)
+                    smallest.z = vertices[i].pos.z;
+            }
+
+            boundingBoxPosition = glm::vec3((largest.x + smallest.x) / 2.0f, (largest.y + smallest.y) / 2.0f, (largest.z + smallest.z) / 2.0f);
+            boundingBoxSize = glm::vec3(largest.x - smallest.x, largest.y - smallest.y, largest.z - smallest.z);
         }
-        toReturn.x = largest.x - smallest.x;
-        toReturn.y = largest.y - smallest.y;
-        toReturn.z = largest.z - smallest.z;
-        return toReturn;
     }
-    glm::vec3 VertexBuffer::findObjectPos()
+    void VertexBuffer::calcAnimBoundingBox()
     {
-        glm::vec3 toReturn;
-        glm::vec3 largest = glm::vec3(0.0f), smallest = glm::vec3(0.0f);
-        for(int i=0;i<vertices.size();i++){
-            if(largest.x < vertices[i].pos.x)
-                largest.x = vertices[i].pos.x;
-            else if(smallest.x > vertices[i].pos.x)
-                smallest.x = vertices[i].pos.x;
+        if (animVertices.size() >= 2) {
+            glm::vec3 largest = glm::vec3(animVertices[0].pos), smallest = glm::vec3(animVertices[0].pos);
+            for (int i = 1; i < animVertices.size(); i++) {
+                if (animVertices[i].pos.x > largest.x)
+                    largest.x = animVertices[i].pos.x;
+                else if (animVertices[i].pos.x < smallest.x)
+                    smallest.x = animVertices[i].pos.x;
 
-            if(largest.y < vertices[i].pos.y)
-                largest.y = vertices[i].pos.y;
-            else if(smallest.y > vertices[i].pos.y)
-                smallest.y = vertices[i].pos.y;
+                if (animVertices[i].pos.y > largest.y)
+                    largest.y = animVertices[i].pos.y;
+                else if (animVertices[i].pos.y < smallest.y)
+                    smallest.y = animVertices[i].pos.y;
 
-            if(largest.z < vertices[i].pos.z)
-                largest.z = vertices[i].pos.z;
-            else if(smallest.z > vertices[i].pos.z)
-                smallest.z = vertices[i].pos.z;
+                if (animVertices[i].pos.z > largest.z)
+                    largest.z = animVertices[i].pos.z;
+                else if (animVertices[i].pos.z < smallest.z)
+                    smallest.z = animVertices[i].pos.z;
+            }
+
+            boundingBoxPosition = glm::vec3((largest.x + smallest.x) / 2.0f, (largest.y + smallest.y) / 2.0f, (largest.z + smallest.z) / 2.0f);
+            boundingBoxSize = glm::vec3(largest.x - smallest.x, largest.y - smallest.y, largest.z - smallest.z);
         }
-        toReturn.x = (largest.x + smallest.x) / 2.0f;
-        toReturn.y = (largest.y + smallest.y) / 2.0f;
-        toReturn.z = (largest.z + smallest.z) / 2.0f;
-        return toReturn;
     }
+    glm::vec3 VertexBuffer::getBoundingBoxPos()
+    {
+        return boundingBoxPosition;
+    }
+    glm::vec3 VertexBuffer::getBoundingBoxSize()
+    {
+        return boundingBoxSize;
+    }
+
     void VertexBuffer::deleteVertexBuffer(Devices &devices)
     {
         vertexBuffer.deleteBuffer(devices);
@@ -126,6 +136,9 @@ namespace gll
             //useStagingBufferToCopyData(devices, vertexBuffer, animVertices, commandPool, bufferSize, 0);
             //useStagingBufferToCopyData(devices, vertexBuffer, indices, commandPool, (sizeof(uint16_t) * indices.size()), sizeof(AnimVertex) * animVertices.size());
         }
+
+        calcBoundingBox();
+        calcAnimBoundingBox();
     }
     void VertexBuffer::bindVertexBuffer(VkCommandBuffer &commandbuffer)
     {

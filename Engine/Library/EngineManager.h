@@ -1,4 +1,4 @@
-#include "ResourceManager.h"
+#include "AnimMesh.h"
 
 namespace gll
 {
@@ -6,7 +6,12 @@ namespace gll
 	{
 		void (*update)();
 
+		std::map<std::string, Scene> scenes;
+
 	public:
+		
+		void addObject(std::string scene, Object* object);
+		void removeObject(std::string scene, std::string name);
 
 		void createEngine(void update());
 		void updateEngine();
